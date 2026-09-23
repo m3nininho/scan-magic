@@ -41,6 +41,8 @@ export default defineConfig({
     },
     lint: {
         ignorePatterns: [
+            '.agents/**',
+            '.codex/**',
             'vendor/**',
             'node_modules/**',
             'public/**',
@@ -64,6 +66,9 @@ export default defineConfig({
         singleAttributePerLine: false,
         htmlWhitespaceSensitivity: 'css',
         ignorePatterns: [
+            '.agents/**',
+            '.codex/**',
+            'AGENTS.md',
             '.github/**',
             'composer.json',
             'resources/js/components/ui/*',
