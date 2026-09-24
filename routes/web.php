@@ -9,35 +9,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
-Route::get('/diagnostico-hash', function () {
-    $rounds = config('hashing.bcrypt.rounds');
-
-    $resultado = [
-        'driver' => config('hashing.driver'),
-        'bcrypt_rounds' => $rounds,
-        'bcrypt_rounds_tipo' => get_debug_type($rounds),
-    ];
-
-    foreach ([
-        'php_com_rounds_12' => 12,
-        'php_com_rounds_configurados' => $rounds,
-    ] as $teste => $custo) {
-        try {
-            $hash = password_hash(
-                'SenhaFicticiaParaDiagnostico!',
-                PASSWORD_BCRYPT,
-                ['cost' => $custo]
-            );
-
-            $resultado[$teste] = $hash !== false;
-        } catch (\Throwable $e) {
-            $resultado[$teste] = false;
-            $resultado[$teste . '_erro'] = $e->getMessage();
-        }
-    }
-
-    return response()->json($resultado);
-});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
