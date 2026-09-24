@@ -10,33 +10,30 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'welcome')->name('home');
 
 Route::get('/diagnostico-hash', function () {
+    $rounds = config('hashing.bcrypt.rounds');
+
     $resultado = [
-        'php_version' => PHP_VERSION,
         'driver' => config('hashing.driver'),
-        'bcrypt_disponivel' => in_array(
-            '2y',
-            password_algos(),
-            true
-        ),
+        'bcrypt_rounds' => $rounds,
+        'bcrypt_rounds_tipo' => get_debug_type($rounds),
     ];
 
-    try {
-        $senha = 'SenhaTemporaria123!';
-
-        $hash = \Illuminate\Support\Facades\Hash::make($senha);
-
-        $resultado['laravel_hash_funciona'] = true;
-
-        $resultado['laravel_check_funciona'] =
-            \Illuminate\Support\Facades\Hash::check(
-                $senha,
-                $hash
+    foreach ([
+        'php_com_rounds_12' => 12,
+        'php_com_rounds_configurados' => $rounds,
+    ] as $teste => $custo) {
+        try {
+            $hash = password_hash(
+                'SenhaFicticiaParaDiagnostico!',
+                PASSWORD_BCRYPT,
+                ['cost' => $custo]
             );
 
-        $resultado['hash_info'] = password_get_info($hash);
-    } catch (\Throwable $e) {
-        $resultado['laravel_hash_funciona'] = false;
-        $resultado['erro'] = $e->getMessage();
+            $resultado[$teste] = $hash !== false;
+        } catch (\Throwable $e) {
+            $resultado[$teste] = false;
+            $resultado[$teste . '_erro'] = $e->getMessage();
+        }
     }
 
     return response()->json($resultado);
