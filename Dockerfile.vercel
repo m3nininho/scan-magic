@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     libpq-dev \
+    tesseract-ocr \
+    tesseract-ocr-eng \
     && docker-php-ext-install pdo_pgsql \
     && rm -rf /var/lib/apt/lists/*
 
