@@ -37,4 +37,4 @@ ENV APP_DEBUG=false
 
 EXPOSE 80
 
-CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-80}"]
+CMD ["sh", "-c", "php artisan serve --no-reload --host=0.0.0.0 --port=${PORT:-80}"]

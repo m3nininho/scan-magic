@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+vendor
+node_modules
+bootstrap/cache/*.php
+public/hot
+public/build
+bootstrap/ssr
