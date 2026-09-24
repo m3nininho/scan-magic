@@ -12,35 +12,31 @@ Route::inertia('/', 'welcome')->name('home');
 Route::get('/diagnostico-hash', function () {
     $resultado = [
         'php_version' => PHP_VERSION,
-        'algoritmos' => password_algos(),
-        'driver_laravel' => config('hashing.driver'),
-        'bcrypt_funciona' => false,
-        'argon2id_funciona' => false,
+        'driver' => config('hashing.driver'),
+        'bcrypt_disponivel' => in_array(
+            '2y',
+            password_algos(),
+            true
+        ),
     ];
 
-    foreach ([
-        'bcrypt' => PASSWORD_BCRYPT,
-        'argon2id' => defined('PASSWORD_ARGON2ID')
-            ? constant('PASSWORD_ARGON2ID')
-            : null,
-    ] as $nome => $algoritmo) {
-        if ($algoritmo === null) {
-            continue;
-        }
+    try {
+        $senha = 'SenhaTemporaria123!';
 
-        try {
-            $hash = password_hash(
-                'SenhaTemporaria123!',
-                $algoritmo
-            );
+        $hash = \Illuminate\Support\Facades\Hash::make($senha);
 
-            $resultado[$nome.'_funciona'] = password_verify(
-                'SenhaTemporaria123!',
+        $resultado['laravel_hash_funciona'] = true;
+
+        $resultado['laravel_check_funciona'] =
+            \Illuminate\Support\Facades\Hash::check(
+                $senha,
                 $hash
             );
-        } catch (\Throwable $e) {
-            $resultado[$nome.'_erro'] = $e->getMessage();
-        }
+
+        $resultado['hash_info'] = password_get_info($hash);
+    } catch (\Throwable $e) {
+        $resultado['laravel_hash_funciona'] = false;
+        $resultado['erro'] = $e->getMessage();
     }
 
     return response()->json($resultado);
