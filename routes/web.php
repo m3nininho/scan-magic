@@ -9,6 +9,43 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
+Route::get('/diagnostico-hash', function () {
+    $resultado = [
+        'php_version' => PHP_VERSION,
+        'algoritmos' => password_algos(),
+        'driver_laravel' => config('hashing.driver'),
+        'bcrypt_funciona' => false,
+        'argon2id_funciona' => false,
+    ];
+
+    foreach ([
+        'bcrypt' => PASSWORD_BCRYPT,
+        'argon2id' => defined('PASSWORD_ARGON2ID')
+            ? constant('PASSWORD_ARGON2ID')
+            : null,
+    ] as $nome => $algoritmo) {
+        if ($algoritmo === null) {
+            continue;
+        }
+
+        try {
+            $hash = password_hash(
+                'SenhaTemporaria123!',
+                $algoritmo
+            );
+
+            $resultado[$nome.'_funciona'] = password_verify(
+                'SenhaTemporaria123!',
+                $hash
+            );
+        } catch (\Throwable $e) {
+            $resultado[$nome.'_erro'] = $e->getMessage();
+        }
+    }
+
+    return response()->json($resultado);
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
