@@ -1,5 +1,12 @@
 import { Link } from '@inertiajs/react';
-import { Clock3, LayoutGrid, Library, ScanLine } from 'lucide-react';
+import {
+    Clock3,
+    LayoutGrid,
+    Library,
+    MessageSquare,
+    ScanLine,
+} from 'lucide-react';
+import { index as deckChat } from '@/actions/App/Http/Controllers/DeckChatController';
 import PendingScanController from '@/actions/App/Http/Controllers/PendingScanController';
 import ScannerController from '@/actions/App/Http/Controllers/ScannerController';
 import CollectionController from '@/actions/App/Http/Controllers/CollectionController';
@@ -19,6 +26,11 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
+    {
+        title: 'Chat Magic',
+        href: deckChat(),
+        icon: MessageSquare,
+    },
     {
         title: 'Início',
         href: dashboard(),

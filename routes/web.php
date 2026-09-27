@@ -3,15 +3,17 @@
 use App\Http\Controllers\CollectionCardController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeckChatController;
 use App\Http\Controllers\PendingScanController;
 use App\Http\Controllers\ScannerController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('deck-chat', [DeckChatController::class, 'index'])->name('deck-chat.index');
+    Route::post('deck-chat', [DeckChatController::class, 'send'])->middleware('throttle:20,1')->name('deck-chat.send');
 
     Route::get('scanner', [ScannerController::class, 'index'])->name('scanner');
     Route::get('collection', [CollectionController::class, 'index'])->name('collection');
