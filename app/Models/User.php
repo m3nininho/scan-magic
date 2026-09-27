@@ -38,6 +38,12 @@ class User extends Authenticatable
         return $this->hasMany(CardScan::class);
     }
 
+    /** @return HasMany<Deck, $this> */
+    public function decks(): HasMany
+    {
+        return $this->hasMany(Deck::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

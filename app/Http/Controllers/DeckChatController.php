@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\DeckChatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -20,6 +21,13 @@ class DeckChatController extends Controller
     {
         $validated = $request->validate([
             'message' => ['required', 'string', 'max:10000'],
+            'context' => ['sometimes', 'array:format,colors,strategy,commander,last_request'],
+            'context.format' => ['sometimes', 'string', 'in:commander,standard,modern,pioneer,pauper,legacy,vintage'],
+            'context.colors' => ['sometimes', 'array', 'list', 'max:5'],
+            'context.colors.*' => ['required', 'string', 'in:W,U,B,R,G', 'distinct'],
+            'context.strategy' => ['sometimes', 'string', 'max:60'],
+            'context.commander' => ['sometimes', 'integer', 'min:1'],
+            'context.last_request' => ['sometimes', 'string', 'in:deck,cards'],
         ], [
             'message.required' => 'Digite uma mensagem.',
             'message.string' => 'A mensagem deve ser um texto.',
@@ -27,10 +35,13 @@ class DeckChatController extends Controller
         ]);
 
         try {
-            $message = $service->send(
+            $result = $service->send(
                 $request->user(),
-                $validated['message']
+                $validated['message'],
+                $validated['context'] ?? [],
             );
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (Throwable $exception) {
             report($exception);
 
@@ -39,6 +50,6 @@ class DeckChatController extends Controller
             ], 503);
         }
 
-        return response()->json(['message' => $message]);
+        return response()->json([...$result, 'context' => (object) $result['context']]);
     }
 }

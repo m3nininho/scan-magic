@@ -7,6 +7,7 @@ import {
     ScanLine,
 } from 'lucide-react';
 import { index as deckChat } from '@/actions/App/Http/Controllers/DeckChatController';
+import { index as decks } from '@/actions/App/Http/Controllers/DeckController';
 import PendingScanController from '@/actions/App/Http/Controllers/PendingScanController';
 import ScannerController from '@/actions/App/Http/Controllers/ScannerController';
 import CollectionController from '@/actions/App/Http/Controllers/CollectionController';
@@ -51,6 +52,7 @@ const mainNavItems: NavItem[] = [
         href: PendingScanController.index(),
         icon: Clock3,
     },
+    { title: 'Meus decks', href: decks(), icon: Library },
 ];
 
 export function AppSidebar() {
@@ -70,10 +72,6 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                <div className="text-sidebar-foreground/60 mt-auto flex items-center gap-3 px-4 py-3 text-sm">
-                    <Library className="size-4" /> Meus decks{' '}
-                    <span className="ml-auto text-xs">Em breve</span>
-                </div>
             </SidebarContent>
 
             <SidebarFooter>

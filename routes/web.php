@@ -4,6 +4,7 @@ use App\Http\Controllers\CollectionCardController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeckChatController;
+use App\Http\Controllers\DeckController;
 use App\Http\Controllers\PendingScanController;
 use App\Http\Controllers\ScannerController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('deck-chat', [DeckChatController::class, 'index'])->name('deck-chat.index');
     Route::post('deck-chat', [DeckChatController::class, 'send'])->middleware('throttle:20,1')->name('deck-chat.send');
+    Route::get('decks', [DeckController::class, 'index'])->name('decks.index');
+    Route::get('decks/{deck}', [DeckController::class, 'show'])->whereNumber('deck')->name('decks.show');
+    Route::post('decks', [DeckController::class, 'store'])->name('decks.store');
 
     Route::get('scanner', [ScannerController::class, 'index'])->name('scanner');
     Route::get('collection', [CollectionController::class, 'index'])->name('collection');

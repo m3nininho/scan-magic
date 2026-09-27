@@ -52,6 +52,23 @@ class ScryfallCardProvider implements CardProviderInterface
         );
     }
 
+    /** @return array<int, ProviderCard> */
+    public function searchPage(string $query, int $page = 1): array
+    {
+        $response = $this->client()->get('/cards/search', [
+            'q' => $query,
+            'page' => $page,
+            'order' => 'name',
+            'dir' => 'asc',
+            'unique' => 'cards',
+        ])->throw();
+
+        return array_map(
+            fn (array $card): ProviderCard => ProviderCard::fromScryfall($card),
+            $response->json('data', []),
+        );
+    }
+
     public function find(string $id): ?ProviderCard
     {
         return Cache::remember(

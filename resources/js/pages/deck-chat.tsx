@@ -3,16 +3,31 @@ import { MessageSquare, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { send } from '@/actions/App/Http/Controllers/DeckChatController';
+import DeckSummary from '@/components/deck-summary';
+import type { DeckDraft } from '@/components/deck-summary';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
-type Message = { id: string; role: 'user' | 'assistant'; content: string };
+type Message = {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    deck?: DeckDraft;
+};
+type ChatContext = {
+    format?: string;
+    colors?: string[];
+    strategy?: string;
+    commander?: number;
+    last_request?: 'deck' | 'cards';
+};
 
 export default function DeckChat() {
     const [messages, setMessages] = useState<Message[]>([]);
+    const [context, setContext] = useState<ChatContext>({});
     const [draft, setDraft] = useState('');
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string>();
@@ -53,7 +68,7 @@ export default function DeckChat() {
                         ? { 'X-XSRF-TOKEN': decodeURIComponent(token) }
                         : {}),
                 },
-                body: JSON.stringify({ message }),
+                body: JSON.stringify({ message, context }),
             });
 
             if (response.status === 401 || response.status === 419) {
@@ -69,7 +84,9 @@ export default function DeckChat() {
             if (response.status === 422) {
                 const payload = await response.json();
                 throw new Error(
-                    payload.errors?.message?.[0] ?? 'Verifique sua mensagem.',
+                    Object.values(
+                        (payload.errors as Record<string, string[]>) ?? {},
+                    ).flat()[0] ?? 'Verifique sua mensagem.',
                 );
             }
             if (!response.ok) {
@@ -78,13 +95,19 @@ export default function DeckChat() {
                 );
             }
 
-            const payload: { message: string } = await response.json();
+            const payload: {
+                message: string;
+                context: ChatContext;
+                deck?: DeckDraft;
+            } = await response.json();
+            setContext(payload.context);
             setMessages((current) => [
                 ...current,
                 {
                     id: crypto.randomUUID(),
                     role: 'assistant',
                     content: payload.message,
+                    deck: payload.deck,
                 },
             ]);
             setDraft('');
@@ -154,9 +177,16 @@ export default function DeckChat() {
                                             ? 'Você'
                                             : 'MagicDeckAgent'}
                                     </p>
-                                    <p className="text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap">
-                                        {message.content}
-                                    </p>
+                                    {message.deck ? (
+                                        <DeckSummary
+                                            deck={message.deck}
+                                            saveable
+                                        />
+                                    ) : (
+                                        <p className="text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap">
+                                            {message.content}
+                                        </p>
+                                    )}
                                 </div>
                             </article>
                         ))}

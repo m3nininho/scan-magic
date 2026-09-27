@@ -81,4 +81,22 @@ class Card extends Model
     {
         return $this->belongsToMany(Collection::class, 'collection_cards')->withPivot('quantity')->withTimestamps();
     }
+
+    /** @return BelongsToMany<Deck, $this, Pivot, 'pivot'> */
+    public function decks(): BelongsToMany
+    {
+        return $this->belongsToMany(Deck::class, 'deck_cards')->withPivot(['quantity', 'role'])->withTimestamps();
+    }
+
+    public function canBeCommander(): bool
+    {
+        $faces = $this->getAttribute('card_faces');
+        $front = is_array($faces) ? ($faces[0] ?? []) : [];
+        $type = $front['type_line'] ?? $this->type ?? '';
+        $text = $front['oracle_text'] ?? $this->text ?? '';
+        $hasStats = ($front['power'] ?? $this->power) !== null && ($front['toughness'] ?? $this->toughness) !== null;
+
+        return (str_contains($type, 'Legendary') && (str_contains($type, 'Creature') || str_contains($type, 'Vehicle') || (str_contains($type, 'Spacecraft') && $hasStats)))
+            || str_contains(strtolower($text), 'can be your commander');
+    }
 }
